@@ -1,0 +1,47 @@
+site_name: Anubhav's Library
+site_description: Notes on data engineering, programming, and reading.
+site_url: https://Anubhav-Singhal.github.io/documents/
+repo_url: https://github.com/Anubhav-Singhal/documents
+repo_name: Anubhav-Singhal/documents
+theme:
+  name: material
+  font: false
+  icon:
+    logo: material/bookshelf
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: custom
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+plugins:
+  - search
+hooks:
+  - hooks/library.py
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - tables
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+extra_css:
+  - stylesheets/library.css
