@@ -1,4 +1,4 @@
-"""Discover category documents at build time, including original root notes."""
+"""Discover category documents at build time, directly from docs folders."""
 from pathlib import Path
 import re
 from urllib.parse import quote
@@ -6,24 +6,18 @@ from mkdocs.structure.files import File
 
 SECTIONS = [
     ("Spark", "spark"), ("Python", "python"), ("Airflow", "airflow"),
-    ("Books", "books"), ("Novels", "novels"),
+    ("Books", "books"), ("Novels", "novels"), ("Others", "others"),
 ]
-LEGACY = {
-    "spark/sql-getting-started.md": ("Spark_SQL_Getting_Started.md", "Spark SQL — Getting Started"),
-    "airflow/airflow-notes.md": ("AirflowNotes.md", "Airflow Notes"),
-    "spark/hbase.md": ("HBASE.md", "HBase — Related Reading"),
+TITLES = {
+    "spark/Spark_SQL_Getting_Started.md": "Spark SQL — Getting Started",
+    "airflow/AirflowNotes.md": "Airflow Notes",
+    "others/HBASE.md": "HBase",
 }
 
 def label(path):
     return re.sub(r"[-_]+", " ", Path(path).stem).strip().title()
 
 def on_files(files, config):
-    root = Path(config.config_file_path).parent
-    for target, (source, title) in LEGACY.items():
-        if files.get_file_from_path(target):
-            raise ValueError(f"{target} is reserved for the original root document")
-        original = (root / source).read_text(encoding="utf-8")
-        files.append(File.generated(config, target, content=original))
     nav = [{"Library": "index.md"}]
     for title, folder in SECTIONS:
         index = f"{folder}/index.md"
@@ -35,7 +29,7 @@ def on_files(files, config):
         entries = [{"Overview": index}]
         links = []
         for page in pages:
-            name = LEGACY[page.src_uri][1] if page.src_uri in LEGACY else label(page.src_uri)
+            name = TITLES.get(page.src_uri, label(page.src_uri))
             entries.append({name: page.src_uri})
             relative = page.src_uri[len(folder) + 1:]
             links.append(f"- [{name}]({quote(relative)})")
@@ -57,3 +51,21 @@ def on_files(files, config):
         nav.append({title: entries})
     config.nav = nav
     return files
+
+def on_post_build(config):
+    """Keep previously shared website links working after the file moves."""
+    redirects = {
+        "spark/sql-getting-started": "../Spark_SQL_Getting_Started/",
+        "airflow/airflow-notes": "../AirflowNotes/",
+        "spark/hbase": "../../others/HBASE/",
+    }
+    for old, target in redirects.items():
+        output = Path(config.site_dir) / old / "index.html"
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta http-equiv="refresh" content="0; url={target}">'
+            '<title>Document moved</title></head><body>'
+            f'<p>This document has moved. <a href="{target}">Open document</a>.</p>'
+            '</body></html>', encoding="utf-8",
+        )

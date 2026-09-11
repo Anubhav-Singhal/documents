@@ -43,4 +43,11 @@ Technical notes, practical references, and the books that stay with you.
 
     [Browse Novels](novels/index.md)
 
+-   **06 / Others**
+
+    ---
+    HBase and references beyond the main collections.
+
+    [Explore Others](others/index.md)
+
 </div>
